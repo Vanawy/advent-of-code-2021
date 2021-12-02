@@ -6,14 +6,18 @@
 #define SAMPLE_SIZE 3
 #define SAMPLE_BUF_SIZE (SAMPLE_SIZE + 1)
 
-int main (void)
+int main (int argc, char *argv[])
 {
+    if (argc < 2) {
+        printf("Excepted argument\n");
+        return 1;
+    }
     FILE *fp;
-    fp = fopen("d1/p2/my.in", "r");
+    fp = fopen( argv[1], "r");
 
     if (fp == NULL) {
       perror("Failed");
-      return 1;
+      return 2;
     }
 
     int prev_sample_sum = -1;
@@ -36,11 +40,9 @@ int main (void)
 
         int current_sample_sum = 0;
         for (int i = 0; i < SAMPLE_SIZE; i++) {
-            int index = (line_counter - SAMPLE_SIZE + i) % SAMPLE_BUF_SIZE;
+            int index = (line_counter - i) % SAMPLE_BUF_SIZE;
             current_sample_sum += sample[index];
         }
-
-        printf("%d\n", current_sample_sum);
 
         if (prev_sample_sum != -1 && current_sample_sum > prev_sample_sum) {
             count++;
