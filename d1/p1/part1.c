@@ -7,7 +7,7 @@
 int main (void)
 {
     FILE *fp;
-    fp = fopen("d1/my.in", "r");
+    fp = fopen("d1/p1/my.in", "r");
 
     if (fp == NULL) {
       perror("Failed");
