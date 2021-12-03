@@ -21,16 +21,15 @@ int main (int argc, char *argv[])
     char line[MAX_LEN];
     int len = 0;
     int i = 0;
+    int rows = 0;
     
     while (fgets(line, MAX_LEN, fp))
     {
         len = strcspn(line, "\n");
         line[len] = 0;
         strcpy(lines[i++], line);
+        rows++;
     }
-
-    // int o = 0;
-    // int co2 = 0;
 
     char o_pattern[MAX_LEN];
     char c_pattern[MAX_LEN];
@@ -42,49 +41,75 @@ int main (int argc, char *argv[])
     {
         o_mask[i] = c_mask[i] = true;
     }
-    
 
-    for (size_t i = 0; i < 1; i++)
+    int o_count = rows;
+    int c_count = rows;
+
+    for (size_t i = 0; i < len; i++)
     {
         int o_balance = 0;
         int c_balance = 0;
-        for (size_t j = 0; j < MAX_ROWS && lines[j] != 0; j++)
+        for (size_t j = 0; j < rows; j++)
         {
             char c = lines[j][i];
-            if (o_mask[j]) {
+            if (o_count > 1 && o_mask[j]) {
                 if (c == '0') o_balance--; else
                 if (c == '1') o_balance++;
             } 
-            if (c_mask[j]) {
+            if (c_count > 1 && c_mask[j]) {
                 if (c == '0') c_balance--; else
                 if (c == '1') c_balance++;
             }
         }
-        printf("%d %d\n", o_balance, c_balance);
-        o_pattern[i] = o_balance > 0 ? '1' : '0';
-        c_pattern[i] = c_balance > 0 ? '0' : '1';
-        printf("%s %s\n", o_pattern, c_pattern);
-        for (size_t j = 0; j < MAX_ROWS && lines[j] != 0; j++)
+        if (o_count > 1)
+            o_pattern[i] = (o_balance >= 0) ? '1' : '0';
+        if (c_count > 1)
+            c_pattern[i] = (c_balance < 0) ? '1' : '0';
+        
+        for (size_t j = 0; j < rows; j++)
         {
             char c = lines[j][i];
-            printf("%c", c);
-            if (c != o_pattern[i]) {
+            if (o_count > 1 && o_mask[j] && c != o_pattern[i]) {
                 o_mask[j] = false;
+                o_count--;
             }
-            if (c != c_pattern[i]) {
-                o_mask[j] = false;
+            if (c_count > 1 && c_mask[j] && c != c_pattern[i]) {
+                c_mask[j] = false;
+                c_count--;
             }
         }
-        printf("\n");
     }
 
-    for (size_t i = 0; i < 12; i++)
+    int o = 0;
+    int co2 = 0;
+
+    for (size_t i = 0; i < rows; i++)
     {
-        printf("%d %s\n", c_mask[i], lines[i]);
+        if (o_mask[i]) {
+            printf("CO2: %s\n", lines[i]);
+            for (size_t j = 0; j < len; j++)
+            {
+                int k = len - j -1;
+                if (lines[i][j] == '1') {
+                    o = (1 << k) | o;
+                }
+            }
+        }
+
+        if (c_mask[i]) {
+            printf("O: %s\n", lines[i]);
+            for (size_t j = 0; j < len; j++)
+            {
+                int k = len - j -1;
+                if (lines[i][j] == '1') {
+                    co2 = (1 << k) | co2;
+                }
+            }
+        }
     }
     
 
-    printf("___\n%s %s\n", o_pattern, c_pattern);
+    printf("___\n%d * %d = %d\n", o, co2, o * co2);
     
     
     // printf("Result: \e[32m%d * %d = %d\e[0m\n", gamma, eps, gamma * eps);
