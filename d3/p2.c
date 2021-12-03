@@ -6,6 +6,8 @@
 #define MAX_LEN 256
 #define MAX_ROWS 1024
 
+int frombinary(char *binary);
+
 int main (int argc, char *argv[])
 {
     if (argc < 2) return 1;
@@ -34,13 +36,8 @@ int main (int argc, char *argv[])
     char o_pattern[MAX_LEN];
     char c_pattern[MAX_LEN];
 
-    bool o_mask[MAX_ROWS];
-    bool c_mask[MAX_ROWS];
-
-    for (size_t i = 0; i < MAX_ROWS; i++)
-    {
-        o_mask[i] = c_mask[i] = true;
-    }
+    bool o_ignore[MAX_ROWS];
+    bool c_ignore[MAX_ROWS];
 
     int o_count = rows;
     int c_count = rows;
@@ -52,11 +49,11 @@ int main (int argc, char *argv[])
         for (size_t j = 0; j < rows; j++)
         {
             char c = lines[j][i];
-            if (o_count > 1 && o_mask[j]) {
+            if (o_count > 1 && !o_ignore[j]) {
                 if (c == '0') o_balance--; else
                 if (c == '1') o_balance++;
             } 
-            if (c_count > 1 && c_mask[j]) {
+            if (c_count > 1 && !c_ignore[j]) {
                 if (c == '0') c_balance--; else
                 if (c == '1') c_balance++;
             }
@@ -69,12 +66,12 @@ int main (int argc, char *argv[])
         for (size_t j = 0; j < rows; j++)
         {
             char c = lines[j][i];
-            if (o_count > 1 && o_mask[j] && c != o_pattern[i]) {
-                o_mask[j] = false;
+            if (o_count > 1 && !o_ignore[j] && c != o_pattern[i]) {
+                o_ignore[j] = true;
                 o_count--;
             }
-            if (c_count > 1 && c_mask[j] && c != c_pattern[i]) {
-                c_mask[j] = false;
+            if (c_count > 1 && !c_ignore[j] && c != c_pattern[i]) {
+                c_ignore[j] = true;
                 c_count--;
             }
         }
@@ -85,34 +82,35 @@ int main (int argc, char *argv[])
 
     for (size_t i = 0; i < rows; i++)
     {
-        if (o_mask[i]) {
+        if (!o_ignore[i]) {
             printf("CO2: %s\n", lines[i]);
-            for (size_t j = 0; j < len; j++)
-            {
-                int k = len - j -1;
-                if (lines[i][j] == '1') {
-                    o = (1 << k) | o;
-                }
-            }
+            o = frombinary(lines[i]);
         }
 
-        if (c_mask[i]) {
+        if (!c_ignore[i]) {
             printf("O: %s\n", lines[i]);
-            for (size_t j = 0; j < len; j++)
-            {
-                int k = len - j -1;
-                if (lines[i][j] == '1') {
-                    co2 = (1 << k) | co2;
-                }
-            }
+            co2 = frombinary(lines[i]);
         }
     }
     
 
     printf("___\n%d * %d = %d\n", o, co2, o * co2);
     
-    
-    // printf("Result: \e[32m%d * %d = %d\e[0m\n", gamma, eps, gamma * eps);
     fclose(fp);
     return 0;
+}
+
+int frombinary(char *binary)
+{
+    int r = 0;
+    int len = strlen(binary);
+    
+    for (size_t i = 0; i < len; i++)
+    {
+        int k = len - i -1;
+        if (binary[i] == '1') {
+            r = (1 << k) | r;
+        }
+    }
+    return r; 
 }
