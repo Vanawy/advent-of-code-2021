@@ -4,7 +4,7 @@
 #include <stdbool.h>
 
 #define MAX_LEN 256
-#define FISH_STATES 10
+#define FISH_STATES 9
 
 int fgetnumbers(FILE *fp, int **results);
 void print_state(long long int *types);
@@ -41,7 +41,7 @@ int main (int argc, char *argv[])
         long long int new_fishes = state[0];
         long long int new_state[FISH_STATES] = {0};
 
-        for (int j = FISH_STATES - 2; j >= 1; j--)
+        for (int j = FISH_STATES - 1; j >= 1; j--)
         {
             new_state[j - 1] = state[j];
         }
