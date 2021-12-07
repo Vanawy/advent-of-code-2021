@@ -4,7 +4,7 @@
 #include <stdbool.h>
 
 #define MAX_LEN 256
-#define SIZE 1000
+#define SIZE 10
 
 typedef struct point
 {
@@ -40,14 +40,12 @@ int main (int argc, char *argv[])
 
     int map[SIZE * SIZE] = {0};
     
-    
     while (!feof(fp))
     {
         LINE line;
         if (!fgetline(fp, &line)) {
             continue;
         }
-        print_line(line); // WTF: dont work without this line
 
         int ii, ji;
         int id = line.b.x - line.a.x;
@@ -91,42 +89,16 @@ int main (int argc, char *argv[])
 
 bool fgetline(FILE *fp, LINE *result)
 {
-    char str[MAX_LEN];
-    fgets(str, MAX_LEN, fp);
-    int len = strcspn(str, "\n");
-    str[len] = 0;
-
-    char buf[] = "   \0";
-    int buf_i = 0;
-
-    int num[4] = {0};
-    int num_i = 0;
-
-    for(int i = 0; i <= len; i++) 
-    {
-        char c = str[i];
-        if (c < '0' || c > '9' || i == len) {
-            if (buf_i > 0) {
-                num[num_i++] = atoi(buf);
-                buf_i = 0;
-                buf[0] = ' ';
-                buf[1] = ' ';
-                buf[2] = ' ';
-            }
-            continue;
-        }
-        buf[buf_i++] = c;
-    }
-    if (num_i == 0) {
+    LINE line;
+    int parsed = fscanf(
+        fp, "%d,%d -> %d,%d\n", 
+        &line.a.x, &line.a.y,
+        &line.b.x, &line.b.y
+    );
+    if (parsed != 4) {
         result = NULL;
         return false;
     }
-
-    LINE line;
-    line.a.x = num[0];
-    line.a.y = num[1];
-    line.b.x = num[2];
-    line.b.y = num[3];
     *result = line;
     return true;
 }
