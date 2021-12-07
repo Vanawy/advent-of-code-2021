@@ -96,7 +96,6 @@ bool fgetline(FILE *fp, LINE *result)
         &line.b.x, &line.b.y
     );
     if (parsed != 4) {
-        result = NULL;
         return false;
     }
     *result = line;
